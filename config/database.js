@@ -2,27 +2,14 @@
  * Database Configuration — MySQL2 Connection Pool
  */
 import mysql from 'mysql2/promise';
-import 'dotenv/config';
 
-// Debug: log env vars
-console.log('[db] DB_HOST:', process.env.DB_HOST);
-console.log('[db] DB_PORT:', process.env.DB_PORT);
-console.log('[db] DB_USER:', process.env.DB_USER);
-console.log('[db] DB_PASS:', process.env.DB_PASS ? '***' : '(empty)');
-console.log('[db] DB_NAME:', process.env.DB_NAME);
-
-// Read host from .env, default to localhost for cPanel
-const DB_HOST = process.env.DB_HOST || 'localhost';
-const DB_PORT = parseInt(process.env.DB_PORT || '3306');
-
-console.log('[db] Using host:', DB_HOST, 'port:', DB_PORT);
-
+// Hardcoded cPanel database credentials
 const pool = mysql.createPool({
-    host: DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME,
-    port: DB_PORT,
+    host: 'localhost',
+    user: 'paxyocom_newRender',
+    password: '_[xgm!h,PT0MUx,y',
+    database: 'paxyocom_paxyov3',
+    port: 3306,
     charset: 'utf8mb4',
     waitForConnections: true,
     connectionLimit: 10,
@@ -33,9 +20,8 @@ const pool = mysql.createPool({
 // TEST CONNECTION AND LOG ERRORS
 pool.getConnection()
     .then(async conn => {
-        console.log('✅ DB Connected to', DB_HOST);
+        console.log('✅ DB Connected to localhost');
         try {
-            // Recreate chat_messages table with correct schema
             await conn.execute(`DROP TABLE IF EXISTS chat_messages`);
             await conn.execute(`
                 CREATE TABLE chat_messages (
@@ -57,7 +43,6 @@ pool.getConnection()
         console.error('   Code:', err.code);
         console.error('   errno:', err.errno);
         console.error('   syscall:', err.syscall);
-        console.error('   Check if user is assigned to DB in cPanel with All Privileges.');
     });
 
 export default pool;

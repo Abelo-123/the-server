@@ -8,13 +8,10 @@ import 'dotenv/config';
 const app = express();
 app.use(express.json());
 
-const DB_CONFIG = {
-    host: 'localhost',
-    user: 'paxyocom_newRender',
-    password: '_[xgm!h,PT0MUx,y',
-    database: 'paxyocom_paxyov3',
-    port: 3306,
-};
+// Root route to test if server is running
+app.get('/', (req, res) => {
+    res.json({ status: 'ok', message: 'Debug server is running' });
+});
 
 app.get('/debug/db', async (req, res) => {
     const results = {
@@ -88,6 +85,12 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🔍 DB Debug server running on port ${PORT}`);
     console.log(`📊 Check: http://localhost:${PORT}/debug/db`);
+    console.log(`📊 Root: http://localhost:${PORT}/`);
+});
+
+// Catch-all for unmatched routes
+app.use((req, res) => {
+    res.status(404).json({ error: 'Not Found', path: req.path });
 });
 
 export default app;

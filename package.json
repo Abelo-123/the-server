@@ -7,6 +7,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
+    "debug-db": "node debug-db.js",
     "build": "echo 'No build step required for Node.js server'"
   },
   "dependencies": {

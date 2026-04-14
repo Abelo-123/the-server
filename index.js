@@ -41,6 +41,34 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', time: new Date().toISOString() });
 });
 
+// DEBUG ROUTES - Test if server is running
+app.get('/api/debug', (req, res) => {
+    res.json({ status: 'ok', message: 'Server is running!' });
+});
+
+app.get('/api/debug/db', async (req, res) => {
+    try {
+        const conn = await pool.getConnection();
+        const [tables] = await conn.query('SHOW TABLES');
+        const [authRows] = await conn.query('SELECT COUNT(*) as cnt FROM auth');
+        conn.release();
+        res.json({ 
+            status: 'success', 
+            dbConnected: true, 
+            tables: tables.length,
+            userCount: authRows[0].cnt
+        });
+    } catch(e) {
+        res.json({ 
+            status: 'error', 
+            dbConnected: false, 
+            error: e.message,
+            code: e.code,
+            errno: e.errno
+        });
+    }
+});
+
 // Test DB connection
 app.get('/api/test-db', async (req, res) => {
     try {

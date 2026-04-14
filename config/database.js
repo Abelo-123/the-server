@@ -5,27 +5,35 @@ import mysql from 'mysql2/promise';
 import 'dotenv/config';
 
 // Debug: log env vars
+console.log('[db] DB_HOST:', process.env.DB_HOST);
+console.log('[db] DB_PORT:', process.env.DB_PORT);
 console.log('[db] DB_USER:', process.env.DB_USER);
 console.log('[db] DB_PASS:', process.env.DB_PASS ? '***' : '(empty)');
 console.log('[db] DB_NAME:', process.env.DB_NAME);
 
 // Read host from .env, default to localhost for cPanel
+const DB_HOST = process.env.DB_HOST || 'localhost';
+const DB_PORT = parseInt(process.env.DB_PORT || '3306');
+
+console.log('[db] Using host:', DB_HOST, 'port:', DB_PORT);
+
 const pool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
+    host: DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
-    port: parseInt(process.env.DB_PORT || '3306'),
+    port: DB_PORT,
     charset: 'utf8mb4',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
+    connectTimeout: 10000,
 });
 
 // TEST CONNECTION AND LOG ERRORS
 pool.getConnection()
     .then(async conn => {
-        console.log('✅ DB Connected');
+        console.log('✅ DB Connected to', DB_HOST);
         try {
             // Recreate chat_messages table with correct schema
             await conn.execute(`DROP TABLE IF EXISTS chat_messages`);
@@ -40,12 +48,15 @@ pool.getConnection()
             `);
             console.log('✅ chat_messages table ready');
         } catch (e) {
-            console.error('❌ Failed to create chat_messages table', e);
+            console.error('❌ Failed to create chat_messages table', e.message);
         }
         conn.release();
     })
     .catch(err => {
         console.error('❌ DB CONNECTION ERROR:', err.message);
+        console.error('   Code:', err.code);
+        console.error('   errno:', err.errno);
+        console.error('   syscall:', err.syscall);
         console.error('   Check if user is assigned to DB in cPanel with All Privileges.');
     });
 
